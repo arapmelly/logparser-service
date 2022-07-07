@@ -22,25 +22,12 @@ use App\LogParser\Exception\ParserException;
 class LogParserService {
 
     
-    private $resumeProcessing;
 
     private $pattern;
 
     private $logParser;
 
     private $logFile;
-
-    private $date;
-
-    private $time;
-
-    private $service;
-
-    private $requestType;
-
-    private $statusCode;
-
-    private $httpHeader;
 
     private $lineCount;
 
@@ -59,7 +46,6 @@ class LogParserService {
         $this->logEntryRepository = $logEntryRepository;
         $this->logFile = 'logs.txt';
         $this->pattern = '/(?<service>\S+)\s+(?<line_1>\S+)\s+(?<line_2>\S+)\s+(?<datetime>\S+)\s+(?<gmt>\S+)\s+(?<method>\S+)\s+(?<path>\S+)\s+(?<http_header>\S+)\s+(?<response_code>\d+)/';
-        $this->resumeProcessing = true;
        
         $this->logParser = new LogParser($this->pattern);
         
