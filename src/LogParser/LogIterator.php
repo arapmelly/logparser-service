@@ -95,6 +95,7 @@ class LogIterator implements \Iterator
     {
         $buffer = '';
 
+       
 
         while($buffer === '') {
             
@@ -104,17 +105,14 @@ class LogIterator implements \Iterator
                 return;
             }
 
+
             $fp = new \SplFileObject($this->logFile);
-            $fp->seek($this->startLine); 
+
+            $fp->seek($this->startLine);
+            
             $buffer = $fp->current();
-          
 
             $buffer = trim($buffer, "\n\r\0");
-
-            if (!$this->skipEmptyLines) {
-                
-                break;
-            }
             
             $this->startLine++;
                 

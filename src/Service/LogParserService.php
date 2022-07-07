@@ -2,7 +2,10 @@
 namespace App\Service;
 
 use App\Entity\LogEntry;
+use App\Entity\LogEntryValue;
+
 use App\Repository\LogEntryRepository;
+use App\Repository\LogEntryValueRepository;
 
 use App\LogParser\LogIterator;
 use App\LogParser\LogParser;
@@ -19,7 +22,6 @@ use App\LogParser\Exception\ParserException;
 class LogParserService {
 
     
-    private $resumeProcessing;
 
     private $pattern;
 
@@ -27,33 +29,23 @@ class LogParserService {
 
     private $logFile;
 
-    private $date;
-
-    private $time;
-
-    private $service;
-
-    private $requestType;
-
-    private $statusCode;
-
-    private $httpHeader;
-
     private $lineCount;
 
     private $repository;
+
+    private $logEntryRepository;
 
     private $startLine;
 
    
 
-    public function __construct(LogEntryRepository $repository) 
+    public function __construct(LogEntryRepository $repository, LogEntryValueRepository $logEntryRepository) 
     {
         $this->lineCount = 1;
         $this->repository = $repository;
+        $this->logEntryRepository = $logEntryRepository;
         $this->logFile = 'logs.txt';
         $this->pattern = '/(?<service>\S+)\s+(?<line_1>\S+)\s+(?<line_2>\S+)\s+(?<datetime>\S+)\s+(?<gmt>\S+)\s+(?<method>\S+)\s+(?<path>\S+)\s+(?<http_header>\S+)\s+(?<response_code>\d+)/';
-        $this->resumeProcessing = true;
        
         $this->logParser = new LogParser($this->pattern);
         
@@ -65,22 +57,22 @@ class LogParserService {
     
     public function processLogFile(){
 
-        $parsedData = [];
+        
 
-       
-     
-        foreach(new LogIterator($this->logFile, $this->logParser, $this->startLine, true) as $data){
+        $logIterator = new LogIterator($this->logFile, $this->logParser, $this->startLine, true);
 
+        foreach( $logIterator as $data){
+             
+            $currentLine = $logIterator->key();
+            $file =  new \SplFileInfo($this->logFile);
+            $fileName = $file->getFilename();
 
-                if($this->setLogData($data)){
-                    $this->saveLogEntry();
-                    array_push($parsedData, ['line'=>$this->startLine, 'data'=>$data]);
-                    $this->lineCount++;   
-                };  
-                
+            $this->saveLogEntry($fileName, $currentLine, $this->lineCount, $data);
+            $this->lineCount++;   
+                        
         }
 
-        return $this->lineCount;
+        return $this->lineCount - 1;
 
     }
 
@@ -94,7 +86,6 @@ class LogParserService {
         //returns zero when no entiries exist.
         $lastItem = $this->repository->getLastRow();
 
-        
 
         if($lastItem){
             
@@ -112,51 +103,50 @@ class LogParserService {
 
     
 
-    public function setLogData($data){
-
-        
-        $datetime = $data['datetime'].' '.$data['gmt'];
-
-        $datedata = substr($datetime, 1, 25);
-
-        $this->date = new \DateTime($datedata);
-
-        //$this->date = $this->date->format('Y-m-D');
-        $this->time = $this->date;
-        $this->service = $data['service'];
-        $this->requestType = $data['method'];
-        $this->path = $data['path'];
-        $this->httpHeader = $data['http_header'];
-        $this->statusCode = $data['response_code'];
-
-        return true;
-    }
-
-    public function saveLogEntry(){
+    public function saveLogEntry($fileName, $currentLine, $lineCount, $data){
 
         try 
         {
             $logentry = new LogEntry();
-            $logentry->setServiceType($this->service);
-            $logentry->setDate($this->date);
-            $logentry->setTime($this->time);
-            $logentry->setRequestType($this->requestType);
-            $logentry->setEndpoint($this->path);
-            $logentry->setHttpHeader($this->httpHeader);
-            $logentry->setStatusCode($this->statusCode);
-            $logentry->setLineNumber($this->lineCount);
+            $logentry->setLogFile($fileName);
+            $logentry->setLogEntry($currentLine);
+            $logentry->setLineNumber($lineCount);
             
             
             $this->repository->add($logentry, true);
 
+            $this->saveLogEntryValues($logentry->getId(), $data);
+
         } catch (ParserException $exception){
             throw new ParserException('could not save the log entry to the database!');
-        }
+        }        
+  
+    }
 
-       
-        //$this->entityManager->persist($logentry);
-        
-        
+
+    /**
+     * store log entry values in db
+     */
+    public function saveLogEntryValues($logentryId, $data){
+
+        foreach($data as $key => $value){
+
+            try 
+        {
+            $logvalue = new LogEntryValue();
+            $logvalue->setLogEntryId($logentryId);
+            $logvalue->setLogKey($key);
+            $logvalue->setLogValue($value);
+            
+            
+            $this->logEntryRepository->add($logvalue, true);
+
+        } catch (ParserException $exception){
+            throw new ParserException('could not save the log entry to the database!');
+        }   
+
+        }
+             
   
     }
 

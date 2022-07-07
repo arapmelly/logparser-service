@@ -14,25 +14,10 @@ class LogEntry
     private $id;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $service_type;
-
-    #[ORM\Column(type: 'date', nullable: true)]
-    private $date;
-
-    #[ORM\Column(type: 'time', nullable: true)]
-    private $time;
+    private $log_file;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $request_type;
-
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $endpoint;
-
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $http_header;
-
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $status_code;
+    private $log_entry;
 
     #[ORM\Column(type: 'bigint', nullable: true)]
     private $line_number;
@@ -42,96 +27,36 @@ class LogEntry
         return $this->id;
     }
 
-    public function getServiceType(): ?string
+    public function getLogEntry(): ?string
     {
-        return $this->service_type;
+        return $this->log_entry;
     }
 
-    public function setServiceType(?string $service_type): self
+    public function setLogEntry(?string $log_entry): self
     {
-        $this->service_type = $service_type;
+        $this->log_entry = $log_entry;
 
         return $this;
     }
 
-    public function getDate(): ?\DateTimeInterface
+    public function getLogFile(): ?string
     {
-        return $this->date;
+        return $this->log_file;
     }
 
-    public function setDate(?\DateTimeInterface $date): self
+    public function setLogFile(?string $log_file): self
     {
-        $this->date = $date;
+        $this->log_file = $log_file;
 
         return $this;
     }
 
-    public function getTime(): ?\DateTimeInterface
-    {
-        return $this->time;
-    }
-
-    public function setTime(?\DateTimeInterface $time): self
-    {
-        $this->time = $time;
-
-        return $this;
-    }
-
-    public function getRequestType(): ?string
-    {
-        return $this->request_type;
-    }
-
-    public function setRequestType(?string $request_type): self
-    {
-        $this->request_type = $request_type;
-
-        return $this;
-    }
-
-    public function getEndpoint(): ?string
-    {
-        return $this->endpoint;
-    }
-
-    public function setEndpoint(?string $endpoint): self
-    {
-        $this->endpoint = $endpoint;
-
-        return $this;
-    }
-
-    public function getHttpHeader(): ?string
-    {
-        return $this->http_header;
-    }
-
-    public function setHttpHeader(?string $http_header): self
-    {
-        $this->http_header = $http_header;
-
-        return $this;
-    }
-
-    public function getStatusCode(): ?string
-    {
-        return $this->status_code;
-    }
-
-    public function setStatusCode(?string $status_code): self
-    {
-        $this->status_code = $status_code;
-
-        return $this;
-    }
-
-    public function getLineNumber(): ?string
+    public function getLineNumber(): ?int
     {
         return $this->line_number;
     }
 
-    public function setLineNumber(?string $line_number): self
+    public function setLineNumber(?int $line_number): self
     {
         $this->line_number = $line_number;
 
