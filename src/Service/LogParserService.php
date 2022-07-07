@@ -13,8 +13,6 @@ use App\LogParser\LogParser;
 use App\LogParser\Exception\ParserException;
 
 
-
-
 /**
  * This is the class that loads logfile, parse log file and insert parsed data to database
  */
@@ -45,8 +43,9 @@ class LogParserService {
         $this->repository = $repository;
         $this->logEntryRepository = $logEntryRepository;
         $this->logFile = 'logs.txt';
-        $this->pattern = '/(?<service>\S+)\s+(?<line_1>\S+)\s+(?<line_2>\S+)\s+(?<datetime>\S+)\s+(?<gmt>\S+)\s+(?<method>\S+)\s+(?<path>\S+)\s+(?<http_header>\S+)\s+(?<response_code>\d+)/';
-       
+        
+        $this->pattern = '/(?<service>\S+) (?<space1>\S+) (?<spacer2>\S+) (?<datetime>\[([^:]+):(\d+:\d+:\d+) ([^\]]+)\]) (?<requestType>\S+) (?<path>\S+) (?<httpHeader>\S+) (?<status>\d+)/';
+        
         $this->logParser = new LogParser($this->pattern);
         
        $this->startLine = $this->getStartLine();
@@ -62,6 +61,10 @@ class LogParserService {
         $logIterator = new LogIterator($this->logFile, $this->logParser, $this->startLine, true);
 
         foreach( $logIterator as $data){
+
+            $data = $this->processData($data);
+
+            
              
             $currentLine = $logIterator->key();
             $file =  new \SplFileInfo($this->logFile);
@@ -73,6 +76,82 @@ class LogParserService {
         }
 
         return $this->lineCount - 1;
+
+    }
+
+    /**
+     * process log data
+     */
+    private function processData($data){
+
+        
+        foreach($data as $key => $value){
+            //check for datetime, httpHeader, path process these by removing special characters if present.
+            if($key === 'datetime'){
+
+                $data['date'] =  $this->processDateTime($value, 'date');
+                $data['time'] =  $this->processDateTime($value, 'time');
+
+            } 
+            
+            /**
+             * process request type by removing double quotes (")
+             */
+            if($key === 'requestType'){
+
+                $data[$key] = preg_replace("/[\"\']/", "", $value );  
+            } 
+
+            /**
+             * process http header by removing double quotes (")
+             */
+            if($key === 'httpHeader'){
+
+                $data[$key] = preg_replace("/[\"\']/", "", $value );  
+            } 
+
+            /**
+             * process path by removing (/)
+             */
+            if($key === 'path'){
+                 
+                $data[$key] = preg_replace("/[\/\']/", "", $value );  
+            } 
+
+            
+
+        }
+
+       
+
+        return $data;
+
+        
+    }
+
+
+    /**
+     * process datetime entry
+     */
+    private function processDateTime($value, $key){
+
+        //remove parantheses
+        $date = preg_replace("/[\[\']/", "", $value ); 
+        $date = preg_replace("/[\]\']/", "", $date );
+
+        
+        $dt = new \DateTime($date);
+
+        //separate date and time based on key
+        if($key === 'date'){
+            $val = $dt->format('m/d/Y');
+        }
+
+        if($key === 'time'){
+            $val = $dt->format('H:i:s');
+        }
+       
+        return $val;
 
     }
 
