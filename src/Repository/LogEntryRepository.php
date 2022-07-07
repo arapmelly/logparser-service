@@ -39,6 +39,15 @@ class LogEntryRepository extends ServiceEntityRepository
         }
     }
 
+
+    public function getLastRow(): ?LogEntry
+{
+    return $this->findOneBy([], ['id' => 'DESC']);
+}
+
+
+
+
 //    /**
 //     * @return LogEntry[] Returns an array of LogEntry objects
 //     */
