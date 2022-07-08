@@ -9,9 +9,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class LogParserAPIRequest 
 {
-
-
-    
+  
     protected $validator;
 
     public function __construct(ValidatorInterface $validator)
@@ -31,7 +29,11 @@ class LogParserAPIRequest
             'serviceNames' => [new Assert\NotBlank, new Assert\NotNull()],
             'startDate' => [new Assert\notBlank, new Assert\NotNull(), new Assert\Date()],
             'endDate' => [new Assert\notBlank, new Assert\NotNull(), new Assert\Date()],
-            'statusCode' => [new Assert\notBlank, new Assert\NotNull()],
+            'statusCode' => [new Assert\notBlank, new Assert\NotNull(), new Assert\Regex([
+                'pattern' => '/^[1-5][0-9][0-9]$/',
+                'match' => true,
+                'message' => 'must be a valid http status code',
+            ])],
         ]);
     }
 
