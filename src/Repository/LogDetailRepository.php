@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\LogEntryValue;
+use App\Entity\LogDetail;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<LogEntryValue>
+ * @extends ServiceEntityRepository<LogDetail>
  *
- * @method LogEntryValue|null find($id, $lockMode = null, $lockVersion = null)
- * @method LogEntryValue|null findOneBy(array $criteria, array $orderBy = null)
- * @method LogEntryValue[]    findAll()
- * @method LogEntryValue[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method LogDetail|null find($id, $lockMode = null, $lockVersion = null)
+ * @method LogDetail|null findOneBy(array $criteria, array $orderBy = null)
+ * @method LogDetail[]    findAll()
+ * @method LogDetail[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class LogEntryValueRepository extends ServiceEntityRepository
+class LogDetailRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, LogEntryValue::class);
+        parent::__construct($registry, LogDetail::class);
     }
 
-    public function add(LogEntryValue $entity, bool $flush = false): void
+    public function add(LogDetail $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class LogEntryValueRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(LogEntryValue $entity, bool $flush = false): void
+    public function remove(LogDetail $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -39,14 +39,8 @@ class LogEntryValueRepository extends ServiceEntityRepository
         }
     }
 
-
-    /**
-     *  get the count of events grouped by serviceNames.
-     *  Filters: date, statusCode
-     */
-
 //    /**
-//     * @return LogEntryValue[] Returns an array of LogEntryValue objects
+//     * @return LogDetail[] Returns an array of LogDetail objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -60,7 +54,7 @@ class LogEntryValueRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?LogEntryValue
+//    public function findOneBySomeField($value): ?LogDetail
 //    {
 //        return $this->createQueryBuilder('l')
 //            ->andWhere('l.exampleField = :val')
