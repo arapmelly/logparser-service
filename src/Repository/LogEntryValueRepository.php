@@ -39,6 +39,12 @@ class LogEntryValueRepository extends ServiceEntityRepository
         }
     }
 
+
+    /**
+     *  get the count of events grouped by serviceNames.
+     *  Filters: date, statusCode
+     */
+
 //    /**
 //     * @return LogEntryValue[] Returns an array of LogEntryValue objects
 //     */

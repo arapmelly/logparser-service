@@ -8,58 +8,54 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
 use App\Request\LogParserAPIRequest;
+use App\Service\LogParserService;
 
 
 class LogParserAPIController extends AbstractController
 {
     private $validator;
 
-    public function __construct(LogParserAPIRequest $validator){
+    private $logParserService;
+
+    public function __construct(LogParserAPIRequest $validator, LogParserService $logParserService){
 
         $this->validator = $validator;
+        $this->logParserService = $logParserService;
     }
     
     #[Route('/count', name: 'app_log_parser_api', methods: ['GET'])]
     public function index(Request $request): JsonResponse
     {   
-        $requestParam = [
-            'serviceNames' => $request->query->get('serviceNames'),
-            'startDate' => $request->query->get('startDate'),
-            'endDate' => $request->query->get('endDate'),
-            'statusCode' => $request->query->get('statusCode')
-        ];
 
-        $violations = $this->validator->validate($requestParam);
+        if(count($request->query->all()) > 0){
 
-        if(count($violations) > 0 )  
-            return $this->errorResponse($violations);
+            $violations = $this->validator->validate($request->query->all());
 
+            if(count($violations) > 0 )  
+               return $this->errorResponse($violations);
 
-        return  $this->json([
-            'response' =>  'processing api',
-        ]);
+        }else {
+
+            return $this->json([ 'errors' =>  'no request parameter' ]);
+        }
+            
+
+        $logCount = $this->logParserService->getLogCount($request->query->all());
+
+        return  $this->json($logCount);
          
         
     }
 
     private function errorResponse($violations){
 
-        if (count($violations) > 0) {
-
-            $errorMessages = [];
-
-            foreach ($violations as $violation) {
-
-                $errorMessages[] = [$violation->getPropertyPath(),$violation->getMessage()];
-            }
-
-            return $this->json([
-                'errors' =>  $errorMessages,
-            ]);
+        foreach ($violations as $violation) {
+            $errorMessages[] = [$violation->getPropertyPath(),$violation->getMessage()];
         }
 
-        
+        return $this->json([ 'errors' =>  $errorMessages ]);   
     }
+
 
 
     

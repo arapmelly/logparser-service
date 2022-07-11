@@ -103,6 +103,7 @@ class LogParserService {
             } 
 
             /**
+             * 
              * process http header by removing double quotes (")
              */
             if($key === 'httpHeader'){
@@ -227,6 +228,21 @@ class LogParserService {
         }
              
   
+    }
+
+
+    /**
+     * get logs count
+     */
+    public function getLogCount($requestParam){
+
+
+
+        return  [
+            'USER-SERVICE'=>10,
+            'INVOICE-SERVICE' => 20
+        ];
+       
     }
 
 }
