@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
+
 use App\Request\LogParserAPIRequest;
 use App\Service\LogParserService;
 
@@ -17,7 +18,7 @@ class LogParserAPIController extends AbstractController
 
     private $logParserService;
 
-    public function __construct(LogParserAPIRequest $validator, LogParserService $logParserService){
+    public function __construct(LogParserService $logParserService, LogParserAPIRequest $validator){
 
         $this->validator = $validator;
         $this->logParserService = $logParserService;
@@ -27,21 +28,16 @@ class LogParserAPIController extends AbstractController
     public function index(Request $request): JsonResponse
     {   
 
-        if(count($request->query->all()) > 0){
-
-            $violations = $this->validator->validate($request->query->all());
-
-            if(count($violations) > 0 )  
-               return $this->errorResponse($violations);
-
-        }else {
-
-            return $this->json([ 'errors' =>  'no request parameter' ]);
-        }
-            
+        
+        $errors = $this->validator->validate($request->query->all());  
+        
+        if(count($errors) > 0 )  
+            return $this->json($errors);
+ 
 
         $logCount = $this->logParserService->getLogCount($request->query->all());
 
+        
         return  $this->json($logCount);
          
         

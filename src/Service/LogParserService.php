@@ -228,11 +228,8 @@ class LogParserService {
         } catch (ParserException $exception){
             throw new ParserException('could not save the log entry to the database!');
         }   
-
-        
-             
-  
     }
+
 
     /**
      * get logs count
@@ -240,12 +237,15 @@ class LogParserService {
     public function getLogCount($requestParam){
 
 
+       $result = $this->logDetailRepository->logCount($requestParam);
 
-        return  [
-            'USER-SERVICE'=>10,
-            'INVOICE-SERVICE' => 20
-        ];
+
+       foreach($result as $r){
        
+            $response['counter'] = $r['total'];
+       }
+       
+       return $response;
     }
 
 }
