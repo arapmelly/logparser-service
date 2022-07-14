@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\LogEntryRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LogEntryRepository::class)]
@@ -21,6 +23,14 @@ class LogEntry
 
     #[ORM\Column(type: 'bigint', nullable: true)]
     private $line_number;
+
+    #[ORM\OneToMany(mappedBy: 'logEntryId', targetEntity: LogDetail::class)]
+    private $logDetails;
+
+    public function __construct()
+    {
+        $this->logDetails = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -59,6 +69,36 @@ class LogEntry
     public function setLineNumber(?int $line_number): self
     {
         $this->line_number = $line_number;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, LogDetail>
+     */
+    public function getLogDetails(): Collection
+    {
+        return $this->logDetails;
+    }
+
+    public function addLogDetail(LogDetail $logDetail): self
+    {
+        if (!$this->logDetails->contains($logDetail)) {
+            $this->logDetails[] = $logDetail;
+            $logDetail->setLogEntryId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLogDetail(LogDetail $logDetail): self
+    {
+        if ($this->logDetails->removeElement($logDetail)) {
+            // set the owning side to null (unless already changed)
+            if ($logDetail->getLogEntryId() === $this) {
+                $logDetail->setLogEntryId(null);
+            }
+        }
 
         return $this;
     }

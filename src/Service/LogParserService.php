@@ -4,10 +4,14 @@ namespace App\Service;
 use App\Entity\LogEntry;
 use App\Entity\LogEntryValue;
 use App\LogParser\Exception\ParserException;
+use App\Entity\LogDetail;
+
+use App\Repository\LogEntryRepository;
+use App\Repository\LogDetailRepository;
+
 use App\LogParser\LogIterator;
 use App\LogParser\LogParser;
-use App\Repository\LogEntryRepository;
-use App\Repository\LogEntryValueRepository;
+
 
 /**
  * This is the class that loads logfile, parse log file and insert parsed data to database
@@ -26,15 +30,17 @@ class LogParserService
 
     private $repository;
 
-    private $logEntryRepository;
+    private $logDetailRepository;
 
     private $startLine;
 
-    public function __construct(LogEntryRepository $repository, LogEntryValueRepository $logEntryRepository)
+   
+
+    public function __construct(LogEntryRepository $repository, LogDetailRepository $logDetailRepository) 
     {
         $this->lineCount = 1;
         $this->repository = $repository;
-        $this->logEntryRepository = $logEntryRepository;
+        $this->logDetailRepository = $logDetailRepository;
         $this->logFile = 'logs.txt';
 
         $this->pattern = '/(?<service>\S+) (?<space1>\S+) (?<spacer2>\S+) (?<datetime>\[([^:]+):(\d+:\d+:\d+) ([^\]]+)\]) (?<requestType>\S+) (?<path>\S+) (?<httpHeader>\S+) (?<status>\d+)/';
@@ -54,13 +60,10 @@ class LogParserService
             foreach ($logIterator as $data) {
 
                 $data = $this->processData($data);
-
-                $currentLine = $logIterator->key();
-                $file = new \SplFileInfo($this->logFile);
-                $fileName = $file->getFilename();
-
-                $this->saveLogEntry($fileName, $currentLine, $this->lineCount, $data);
-                $this->lineCount++;
+             
+            $currentLine = $logIterator->key();
+            $file =  new \SplFileInfo($this->logFile);
+            $fileName = $file->getFilename();
 
             }
 
@@ -96,6 +99,7 @@ class LogParserService
             }
 
             /**
+             * 
              * process http header by removing double quotes (")
              */
             if ($key === 'httpHeader') {
@@ -178,7 +182,7 @@ class LogParserService
 
             $this->repository->add($logentry, true);
 
-            $this->saveLogEntryValues($logentry->getId(), $data);
+            $this->saveLogEntryValues($logentry, $data);
 
         } catch (ParserException $exception) {
             throw new ParserException('could not save the log entry to the database!');
@@ -192,23 +196,43 @@ class LogParserService
     public function saveLogEntryValues($logentryId, $data)
     {
 
-        foreach ($data as $key => $value) {
+     
+        try 
+        {
+            $logvalue = new LogDetail();
+            $logvalue->setLogEntryId($logentryId);
+            $logvalue->setService($data['service']);
+            $logvalue->setDate(new \DateTime($data['date']));
+            $logvalue->setTime(new \DateTime($data['time']));
+            $logvalue->setRequestType($data['requestType']);
+            $logvalue->setPath($data['path']);
+            $logvalue->setHttpHeader($data['httpHeader']);
+            $logvalue->setStatusCode($data['status']);
+            
+            
+            $this->logDetailRepository->add($logvalue, true);
 
-            try
-            {
-                $logvalue = new LogEntryValue();
-                $logvalue->setLogEntryId($logentryId);
-                $logvalue->setLogKey($key);
-                $logvalue->setLogValue($value);
+        } catch (ParserException $exception){
+            throw new ParserException('could not save the log entry to the database!');
+        }   
+    }
 
-                $this->logEntryRepository->add($logvalue, true);
 
-            } catch (ParserException $exception) {
-                throw new ParserException('could not save the log entry to the database!');
-            }
+    /**
+     * get logs count
+     */
+    public function getLogCount($requestParam){
 
-        }
 
+       $result = $this->logDetailRepository->logCount($requestParam);
+
+
+       foreach($result as $r){
+       
+            $response['counter'] = $r['total'];
+       }
+       
+       return $response;
     }
 
 }
