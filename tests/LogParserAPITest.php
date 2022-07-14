@@ -14,6 +14,6 @@ class LogParserAPITest extends TestCase
         
     $response = $client->request('GET', 'http://symfony_dockerized_nginx_1/count');
 
-    $this->assertEquals(201, $response->getStatusCode());
+    $this->assertEquals(200, $response->getStatusCode());
     }
 }
