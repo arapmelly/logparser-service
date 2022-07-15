@@ -63,7 +63,7 @@ php bin/phpunit
 
 ## Usage
 
-- update the .env  with the log file url and the parsing pattern: 
+- update the .env  with the log file path and the parsing pattern: 
 
 Log File:
 ```
