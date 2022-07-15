@@ -50,11 +50,10 @@ class LogParserCommand extends Command
             '',
         ]);
 
-        $processedLogs = $this->logParserService->processLogFile();
+        $processedStatus = $this->logParserService->processLogFile();
         
-        $output->writeln('Processed Lines: '.$processedLogs);
-        $output->writeln('Done.');
-
+        ($processedStatus) ? $output->writeln('Done.') : $output->writeln('Failed.');
+            
         return Command::SUCCESS;
 
     }
