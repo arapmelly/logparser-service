@@ -33,6 +33,12 @@ DATABASE_URL=mysql://root:hello@db:3306/app_db?serverVersion=8.0.23
 
 You could change the name, user and password of the database in the `env` file at the root of the project.
 
+7. Run database migrations
+
+```
+php bin/console doctrine:migrations:migrate
+```
+
 ## Running Tests
 
 Inside the `php` container, create a new database `app_db_test` using the following commands.
@@ -55,6 +61,18 @@ php bin/console --env=test doctrine:schema:create
 php bin/phpunit
 ```
 
+## Usage
+
+- update the .env  with the log file url. You can use the test log from cloudinary: 
+
+```
+LOG_FILE=https://res.cloudinary.com/cvmama/raw/upload/v1657778779/logs.txt
+```
+- run the console command to process the log file
+
+```
+php bin/console app:log-parser
+```
 
 ## To Do:
 
