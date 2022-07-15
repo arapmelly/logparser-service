@@ -15,32 +15,32 @@ services:
         ports:
             - 3308:3306
         networks:
-            - symfony
+            - logparser
     php:
         build:
             context: ./php
             args:
                 TIMEZONE: ${TIMEZONE}
         volumes:
-            - symfony_dockerized_app_sync:/var/www/symfony/
+            - log_parser_app_sync:/var/www/symfony/
         networks:
-            - symfony
+            - logparser
     nginx:
         build:
             context: ./nginx
         volumes:
-            - symfony_dockerized_app_sync:/var/www/symfony/
+            - log_parser_app_sync:/var/www/symfony/
         ports:
             - 8080:80
         networks:
-            - symfony
+            - logparser
         env_file:
             - .env.nginx.local
 
 volumes:
-    symfony_dockerized_app_sync:
+    log_parser_app_sync:
         external: true
     db_app:
 
 networks:
-    symfony:
+    logparser:
