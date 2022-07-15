@@ -63,11 +63,18 @@ php bin/phpunit
 
 ## Usage
 
-- update the .env  with the log file url. You can use the test log from cloudinary: 
+- update the .env  with the log file url and the parsing pattern: 
 
+Log File:
 ```
-LOG_FILE=https://res.cloudinary.com/cvmama/raw/upload/v1657778779/logs.txt
+LOG_FILE_PATH="logs.txt"
 ```
+
+Log pattern: 
+```
+LOG_PATTERN="/(?<service>\S+) (?<space1>\S+) (?<spacer2>\S+) (?<datetime>\[([^:]+):(\d+:\d+:\d+) ([^\]]+)\]) (?<requestType>\S+) (?<path>\S+) (?<httpHeader>\S+) (?<status>\d+)/"
+```
+
 - run the console command to process the log file
 
 ```
@@ -77,6 +84,8 @@ php bin/console app:log-parser
 ## To Do:
 
 - Resetting the database automatically before each test
+- extend test coverage
+- support for remote log files
 
 
 ## Credits

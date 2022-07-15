@@ -41,9 +41,9 @@ class LogParserService
         $this->lineCount = 1;
         $this->repository = $repository;
         $this->logDetailRepository = $logDetailRepository;
-        $this->logFile = 'logs.txt';
+        $this->logFile = $_ENV['LOG_FILE_PATH'];
 
-        $this->pattern = '/(?<service>\S+) (?<space1>\S+) (?<spacer2>\S+) (?<datetime>\[([^:]+):(\d+:\d+:\d+) ([^\]]+)\]) (?<requestType>\S+) (?<path>\S+) (?<httpHeader>\S+) (?<status>\d+)/';
+        $this->pattern = $_ENV['LOG_PATTERN'];
 
         $this->logParser = new LogParser($this->pattern);
 
