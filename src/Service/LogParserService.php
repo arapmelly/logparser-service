@@ -54,25 +54,32 @@ class LogParserService
     public function processLogFile()
     {
 
-        try {
+       
             $logIterator = new LogIterator($this->logFile, $this->logParser, $this->startLine, true);
 
-            foreach ($logIterator as $data) {
+            try {
+                
+                foreach( $logIterator as $data){
 
-                $data = $this->processData($data);
-             
-                $currentLine = $logIterator->key();
+                    $data = $this->processData($data);
+                    
+                    $currentLine = $logIterator->key();
+                    $file =  new \SplFileInfo($this->logFile);
+                    $fileName = $file->getFilename();
 
-                $this->saveLogEntry($this->logFile, $currentLine, $lineCount, $data);
+                    $this->saveLogEntry($fileName, $currentLine, $this->lineCount, $data);
+                    $this->lineCount++;   
+                            
+                }
+
+               return true;
+            } catch (ParserException $exception) {
+                // throw new ParserException('could not save the log entry to the database!');
+                return false;
 
             }
 
-            return true;
-
-        } catch (\Exception $e) {
-            return false;
-        }
-
+            
     }
 
     /**
