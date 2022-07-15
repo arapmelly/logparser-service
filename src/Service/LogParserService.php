@@ -61,9 +61,9 @@ class LogParserService
 
                 $data = $this->processData($data);
              
-            $currentLine = $logIterator->key();
-            $file =  new \SplFileInfo($this->logFile);
-            $fileName = $file->getFilename();
+                $currentLine = $logIterator->key();
+
+                $this->saveLogEntry($this->logFile, $currentLine, $lineCount, $data);
 
             }
 
